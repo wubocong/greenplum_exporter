@@ -168,18 +168,18 @@ func (databaseSizeScraper) Scrape(db *sql.DB, ch chan<- prometheus.Metric, ver i
 
 func queryTablesCount(dbname string, ch chan<- prometheus.Metric) (count float64, err error) {
 	aesSecretKey, errFile := os.ReadFile("aes.vault")
-	if err != nil {
+	if errFile != nil {
 		err = errFile
 		return
 	}
 
-	dataSourceName, errDecrypt := aes.AesCbcDecryptByBase64(os.Getenv("GPDB_DATA_SOURCE_URL"), []byte(string(aesSecretKey)), nil)
+	dataSourceName, errDecrypt := aes.AesCbcDecryptByBase64(os.Getenv("GPDB_DATA_SOURCE_URL"), []byte(aesSecretKey), nil)
 	if errDecrypt != nil {
 		err = errDecrypt
 		return
 	}
 
-	newDataSourceName := strings.Replace(dataSourceName, "/postgres", "/"+dbname, 1)
+	newDataSourceName := strings.Replace(string(dataSourceName), "/postgres", "/"+dbname, 1)
 	logger.Infof("Connection string is : %s", newDataSourceName)
 	conn, errA := sql.Open("postgres", newDataSourceName)
 

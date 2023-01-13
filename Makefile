@@ -18,7 +18,7 @@ build:
 
 .PHONY: package
 package:
-	@echo " > Archive binary target files and srcipts..."
+	@echo " > Archive binary target files and scripts..."
 	if [ ! -d bin/ ]; then mkdir bin/ ; fi;
 	cd bin/ && mkdir -p dist && mkdir -p tmp && cd -
 	go build -o ./bin/tmp/greenplum_exporter

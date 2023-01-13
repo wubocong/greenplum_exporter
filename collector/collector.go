@@ -5,6 +5,7 @@ import (
 	"fmt"
 	_ "github.com/lib/pq"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/wumansgy/goEncrypt/aes"
 	"greenplum-exporter/stopwatch"
 	logger "github.com/prometheus/common/log"
 	"os"
@@ -134,16 +135,16 @@ func (c *GreenPlumCollector) getGreenPlumConnection() error {
 	//参考：https://blog.csdn.net/u010412301/article/details/85037685
 	
 	aesSecretKey, errFile := os.ReadFile("aes.vault")
-	if err != nil {
+	if errFile != nil {
 		return errFile
 	}
 
-	dataSourceName, errDecrypt := aes.AesCbcDecryptByBase64(os.Getenv("GPDB_DATA_SOURCE_URL"), []byte(string(aesSecretKey)), nil)
+	dataSourceName, errDecrypt := aes.AesCbcDecryptByBase64(os.Getenv("GPDB_DATA_SOURCE_URL"), []byte(aesSecretKey), nil)
 	if errDecrypt != nil {
 		return errDecrypt
 	}
 
-	db, err := sql.Open("postgres", dataSourceName)
+	db, err := sql.Open("postgres", string(dataSourceName))
 
 	if err != nil {
 		return err
